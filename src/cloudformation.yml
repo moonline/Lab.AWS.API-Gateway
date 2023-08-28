@@ -1,0 +1,89 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+
+Description: >
+  Concert API example application
+
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - test
+      - prod
+    Description: Deployment environment, e.g. dev for development
+
+
+Resources:
+  # Reference https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-dynamodb-table.html
+  ConcertsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      TableName: !Sub "concerts-${Environment}""
+      AttributeDefinitions:
+        - AttributeName: artist
+          AttributeType: S
+        - AttributeName: concert
+          AttributeType: S
+        - AttributeName: ticket_sales
+          AttributeType: N
+      KeySchema:
+        - AttributeName: artist
+          KeyType: HASH
+        - AttributeName: concert
+          KeyType: RANGE
+      Tags:
+        - Key: Application
+          Value: Concerts
+        - Key: Environment
+          Value: !Ref Environment
+
+  # Reference https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
+  ApiHandlerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      Runtime: python3.9
+      CodeUri: "./lambda/concerts_api_handler/src"
+      Layers:
+        - !Sub "arn:aws:lambda:${region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:40"
+      Tracing: Active
+      Timeout: 120
+      Architectures:
+        - arm64
+      Environment:
+        Variables: 
+          TABLE_NAME: !Ref ConcertsTable
+      Policies:
+        - AWSLambdaExecute
+        - Version: '2012-10-17' 
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:PutItem
+              Resource: !GetAtt ConcertsTable.Arn
+
+  # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-api.html
+  ConcertsApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      Name: Concerts API
+      Description: An API to list and add concerts
+      StageName: !Ref Environment
+      DefinitionBody:
+        Fn::Transform:
+          Name: AWS::Include
+          Parameters:
+            Location: "./api/concerts.yml"
+      Variables:
+        concerts_api_handler_lambda_arn: !GetAtt ApiHandlerFunction.Arn
+      Tags:
+        Application: Concerts
+        Environments: !Ref Environment
+    
+
+Outputs:
