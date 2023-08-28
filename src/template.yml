@@ -1,8 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 
-Description: >
-  Concert API example application
+Description: Concert API example application
 
 
 Parameters:
@@ -22,7 +21,7 @@ Resources:
     Type: AWS::DynamoDB::Table
     Properties:
       BillingMode: PAY_PER_REQUEST
-      TableName: !Sub "concerts-${Environment}""
+      TableName: !Sub "concerts-${Environment}"
       AttributeDefinitions:
         - AttributeName: artist
           AttributeType: S
@@ -78,9 +77,8 @@ Resources:
         Fn::Transform:
           Name: AWS::Include
           Parameters:
-            Location: "./api/concerts.yml"
-      Variables:
-        concerts_api_handler_lambda_arn: !GetAtt ApiHandlerFunction.Arn
+            Location: "./api/concerts.yaml"
+            concerts_api_handler_lambda_arn: !GetAtt ApiHandlerFunction.Arn
       Tags:
         Application: Concerts
         Environments: !Ref Environment
