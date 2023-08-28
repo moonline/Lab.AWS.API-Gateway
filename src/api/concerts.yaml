@@ -1,0 +1,152 @@
+# Validator: https://editor.swagger.io/
+openapi: 3.0.1
+
+info:
+  title: Concerts management API
+  description: A REST API to create and list concerts
+  version: 1.0.0
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+      required:
+        - code
+        - message
+    Concert:
+      type: object
+      properties:
+        artist:
+          description: The name of the artist of the concert
+          type: string
+        concert:
+          description: The name of the concert
+          type: string
+        ticket_sales:
+          description: Sales made for the concert
+          type: string
+    ListConcertsByArtistResponse:
+      description: Reponds a list of concerts that match with the given artist
+      type: array
+      items:
+        $ref: "#/components/schemas/Concert"
+    CreateConcertResponse:
+      $ref: "#/components/schemas/Concert"
+
+  responses:
+    BadRequest:
+      description: The provided approval request ended in an incorrect result.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: The specified resource was not found.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    InternalServerError:
+      description: Unexpected error.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+tags:
+  - name: concerts
+    description: Concerts endpoints
+
+paths:
+  /concerts:
+    get:
+      operationId: getconcerts
+      description: Returns a list of concerts
+      tags:
+        - list-concerts
+      parameters:
+        - in: query
+          name: artist
+          schema:
+            type: string
+          description: Artist to filter the concerts
+      responses:
+        200:
+          description: Successfully retrieved concerts
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ListConcertsByArtistResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        payloadFormatVersion: "1.0"
+        timeoutInMillis: 10000
+        type: aws_proxy
+        uri: "${concerts_api_handler_lambda_arn}"
+      x-amazon-apigateway-request-validators:
+        Validate body:
+          validateRequestParameters: true
+          validateRequestBody: false
+      security:
+        - api_key: []
+        - api_authorizer: []
+
+    put:
+      operationId: putconcert
+      description: Add a new concert
+      tags:
+        - create-concert
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Concert"
+            example: |
+              {
+                "artist": "Madonna",
+                "concert": "This is Madonna 2023",
+                "ticket_sales": 5000000
+              }
+      responses:
+        200:
+          description: Successfully added concert
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateConcertResponse"
+              example: |
+              {
+                "artist": "Madonna",
+                "concert": "This is Madonna 2023",
+                "ticket_sales": 5000000
+              }
+        400:
+          $ref: "#/components/responses/BadRequest"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        payloadFormatVersion: "1.0"
+        timeoutInMillis: 10000
+        type: aws_proxy
+        uri: "${concerts_api_handler_lambda_arn}"
+      x-amazon-apigateway-request-validators:
+        Validate body:
+          validateRequestParameters: true
+          validateRequestBody: true
