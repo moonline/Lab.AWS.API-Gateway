@@ -17,11 +17,11 @@ def to_dynamodb_record(record: dict) -> dict:
 
     Returns:
         A DynamoDB record. Example:
-        {
-            'artist': { 'S': 'Zoe' },
-            'concert': { 'S': 'French tales' },
-            'ticket_sales': { 'N': 80000 }
-        }
+            {
+                'artist': { 'S': 'Zoe' },
+                'concert': { 'S': 'French tales' },
+                'ticket_sales': { 'N': 80000 }
+            }
     """
     serializer = TypeSerializer()
     return {
@@ -45,11 +45,11 @@ def from_dynamodb_record(record: dict) -> dict:
 
     Returns:
         A Python dict. Example:
-        {
-            'artist': 'Zoe',
-            'concert': 'French tales',
-            'ticket_sales': 80000
-        }
+            {
+                'artist': 'Zoe',
+                'concert': 'French tales',
+                'ticket_sales': 80000
+            }
     """
     deserializer = TypeDeserializer()
     return {

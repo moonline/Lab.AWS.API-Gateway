@@ -33,14 +33,14 @@ class ConcertsController:
 
         Returns:
             A list of concerts matching the event parameters. Example:
-            [
-                {
-                    "artist": "Madonna",
-                    "concert": "This is Madonna 2023",
-                    "ticket_sales": 5000000
-                },
-                ...
-            ]
+                [
+                    {
+                        "artist": "Madonna",
+                        "concert": "This is Madonna 2023",
+                        "ticket_sales": 5000000
+                    },
+                    ...
+                ]
 
         Raises:
             400 BadRequestError validation error. Example:
@@ -68,11 +68,11 @@ class ConcertsController:
 
         Returns:
             The created concert. Example:
-            {
-                "artist": "Madonna",
-                "concert": "This is Madonna 2023",
-                "ticket_sales": 5000000
-            }
+                {
+                    "artist": "Madonna",
+                    "concert": "This is Madonna 2023",
+                    "ticket_sales": 5000000
+                }
 
         Raises:
             400 BadRequestError validation error. Example:

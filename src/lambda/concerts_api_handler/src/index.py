@@ -24,14 +24,14 @@ def get_concerts() -> list[dict]:
 
     Returns:
         A list of concerts. Example:
-        [
-            {
-                "artist": "Madonna",
-                "concert": "This is Madonna 2023",
-                "ticket_sales": 5000000
-            },
-            ...
-        ]
+            [
+                {
+                    "artist": "Madonna",
+                    "concert": "This is Madonna 2023",
+                    "ticket_sales": 5000000
+                },
+                ...
+            ]
     """
     parameters: dict = app.current_event.query_string_parameters
 
@@ -51,11 +51,11 @@ def put_concert() -> dict:
 
     Returns:
         The created concert. Example:
-        {
-            "artist": "Madonna",
-            "concert": "This is Madonna 2023",
-            "ticket_sales": 5000000
-        }
+            {
+                "artist": "Madonna",
+                "concert": "This is Madonna 2023",
+                "ticket_sales": 5000000
+            }
     """
     body: dict = app.current_event.json_body
 

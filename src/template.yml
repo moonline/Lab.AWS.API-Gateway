@@ -74,12 +74,11 @@ Resources:
           Name: 'AWS::Include'
           Parameters:
             Location: './api/concerts.yaml'
-      StageVariables:
-        concerts_api_handler_lambda_arn: !GetAtt ApiHandlerFunction.Arn
       Tags:
         Application: Concerts
         Environment: !Ref env
     
+    # TODO Allow API GW to execute Lambda
 
 Outputs:
   ConcertsApiUrl:

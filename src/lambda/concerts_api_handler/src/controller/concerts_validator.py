@@ -3,8 +3,8 @@ def validate_get_concerts_event(event: dict) -> None:
     Validates a GET concerts Lambda event
 
     Parameters:
-        - event p           DEFINED
-        - p.artist          LENGTH > 2
+        event (dict):       Must be DEFINED
+            artist (str):   Must have LENGTH > 2
 
     Example:
         self.validate_get_concerts_event(
@@ -30,10 +30,10 @@ def validate_put_concert_event(event: dict) -> None:
     Validates a PUT concert Lambda event
 
     Parameters:
-        - event p           DEFINED
-        - p.artist          LENGTH > 2
-        - p.concert         LENGTH > 2
-        - p.ticket_sales    > 0
+        event (dict):               Must be DEFINED
+            artist (str):           Must have LENGTH > 2
+            concert (str):          Must have LENGTH > 2
+            ticket_sales (int):     Must be > 0
 
     Example:
         self.validate_get_concerts_event({
