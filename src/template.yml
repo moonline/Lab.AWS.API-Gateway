@@ -5,7 +5,7 @@ Description: Concert API example application
 
 
 Parameters:
-  Environment:
+  env:
     Type: String
     Default: dev
     AllowedValues:
@@ -21,14 +21,12 @@ Resources:
     Type: AWS::DynamoDB::Table
     Properties:
       BillingMode: PAY_PER_REQUEST
-      TableName: !Sub "concerts-${Environment}"
+      TableName: !Sub 'concerts-${env}'
       AttributeDefinitions:
         - AttributeName: artist
           AttributeType: S
         - AttributeName: concert
           AttributeType: S
-        - AttributeName: ticket_sales
-          AttributeType: N
       KeySchema:
         - AttributeName: artist
           KeyType: HASH
@@ -38,7 +36,7 @@ Resources:
         - Key: Application
           Value: Concerts
         - Key: Environment
-          Value: !Ref Environment
+          Value: !Ref env
 
   # Reference https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
   ApiHandlerFunction:
@@ -46,9 +44,9 @@ Resources:
     Properties:
       Handler: index.handler
       Runtime: python3.9
-      CodeUri: "./lambda/concerts_api_handler/src"
+      CodeUri: './lambda/concerts_api_handler/src'
       Layers:
-        - !Sub "arn:aws:lambda:${region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:40"
+        - !Sub 'arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:40'
       Tracing: Active
       Timeout: 120
       Architectures:
@@ -70,18 +68,20 @@ Resources:
   ConcertsApi:
     Type: AWS::Serverless::HttpApi
     Properties:
-      Name: Concerts API
-      Description: An API to list and add concerts
-      StageName: !Ref Environment
+      StageName: !Ref env
       DefinitionBody:
-        Fn::Transform:
-          Name: AWS::Include
+        'Fn::Transform':
+          Name: 'AWS::Include'
           Parameters:
-            Location: "./api/concerts.yaml"
-            concerts_api_handler_lambda_arn: !GetAtt ApiHandlerFunction.Arn
+            Location: './api/concerts.yaml'
+      StageVariables:
+        concerts_api_handler_lambda_arn: !GetAtt ApiHandlerFunction.Arn
       Tags:
         Application: Concerts
-        Environments: !Ref Environment
+        Environment: !Ref env
     
 
 Outputs:
+  ConcertsApiUrl:
+    Description: The URL of the concerts API
+    Value: !Sub 'https://${ConcertsApi}.execute-api.${AWS::Region}.amazonaws.com/${env}'

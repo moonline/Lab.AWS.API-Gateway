@@ -100,9 +100,6 @@ paths:
         Validate body:
           validateRequestParameters: true
           validateRequestBody: false
-      security:
-        - api_key: []
-        - api_authorizer: []
 
     put:
       operationId: putconcert
@@ -129,11 +126,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/CreateConcertResponse"
               example: |
-              {
-                "artist": "Madonna",
-                "concert": "This is Madonna 2023",
-                "ticket_sales": 5000000
-              }
+                {
+                  "artist": "Madonna",
+                  "concert": "This is Madonna 2023",
+                  "ticket_sales": 5000000
+                }
         400:
           $ref: "#/components/responses/BadRequest"
         404:
