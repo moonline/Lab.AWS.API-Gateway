@@ -4,9 +4,9 @@ import re
 
 from aws_lambda_powertools.event_handler.exceptions import BadRequestError
 
-from model.concer import Concert
+from model.concert import Concert
 from repository.concerts_repository import ConcertsRepository
-from concerts_validator import validate_get_concerts_event, validate_put_concert_event
+from controller.concerts_validator import validate_get_concerts_event, validate_put_concert_event
 
 
 class ConcertsController:
@@ -19,45 +19,45 @@ class ConcertsController:
             repository = ConcertsRepository()
             controller = ConcertsController(repository)
 
-        Returns:
-            A ConcertsController instance
+        :return: A ConcertsController instance
         """
         self.repository = repository
 
-    def get_concerts_action(self, event: dict) -> list[Concert]:
+    def get_concerts_action(self, parameters: dict) -> list[Concert]:
         """
         Example:
             controller.get_concerts_action(
                 { "artist": "Madonna" }
             )
 
-        Returns:
-            A list of concerts matching the event parameters. Example:
-                [
-                    {
-                        "artist": "Madonna",
-                        "concert": "This is Madonna 2023",
-                        "ticket_sales": 5000000
-                    },
-                    ...
-                ]
+        :param dict parameters: API GW parameters. Example:
+            { "artist": "Madonna" }
 
-        Raises:
-            400 BadRequestError validation error. Example:
+        :return: A list of concerts matching the parameters. Example:
+            [
                 {
-                    "statusCode": 400,
-                    "message": "Parameter invalid! artist must have minimal 2 characters"
-                }
+                    "artist": "Madonna",
+                    "concert": "This is Madonna 2023",
+                    "ticket_sales": 5000000
+                },
+                ...
+            ]
+
+        :raises BadRequestError: For validation errors. Example:
+            {
+                "statusCode": 400,
+                "message": "Parameter invalid! artist must have minimal 2 characters"
+            }
         """
         try:
-            validate_get_concerts_event(event)
+            validate_get_concerts_event(parameters)
         except AssertionError as error:
             raise BadRequestError(f'Parameter invalid! {str(error)}')
 
-        return self.repository.find_concerts_by_artist(event.get('artist'))
+        return self.repository.find_concerts_by_artist(parameters.get('artist'))
         
         
-    def put_concert_action(self, event: dict) -> Concert:
+    def put_concert_action(self, parameters: dict) -> Concert:
         """
         Example:
             controller.get_concerts_action({
@@ -66,24 +66,22 @@ class ConcertsController:
                 "ticket_sales": 5000000
             })
 
-        Returns:
-            The created concert. Example:
-                {
-                    "artist": "Madonna",
-                    "concert": "This is Madonna 2023",
-                    "ticket_sales": 5000000
-                }
+        :return: The created concert. Example:
+            {
+                "artist": "Madonna",
+                "concert": "This is Madonna 2023",
+                "ticket_sales": 5000000
+            }
 
-        Raises:
-            400 BadRequestError validation error. Example:
-                {
-                    "statusCode": 400,
-                    "message": "Parameter invalid! artist must have minimal 2 characters"
-                }
+        :raises BadRequestError: For validation errors. Example:
+            {
+                "statusCode": 400,
+                "message": "Parameter invalid! artist must have minimal 2 characters"
+            }
         """
         try:
-            validate_put_concert_event(event)
+            validate_put_concert_event(parameters)
         except AssertionError as error:
             raise BadRequestError(f'Parameter invalid! {str(error)}')
 
-        return self.repository.create_concert(event)
+        return self.repository.create_concert(parameters)

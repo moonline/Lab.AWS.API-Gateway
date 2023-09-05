@@ -94,9 +94,10 @@ paths:
         httpMethod: POST
         payloadFormatVersion: "1.0"
         timeoutInMillis: 10000
+        passthroughBehavior: "when_no_match"
         type: aws_proxy
         uri:
-          Fn::Sub: ${ApiHandlerFunction.Arn}
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiHandlerFunction.Arn}/invocations"
       x-amazon-apigateway-request-validators:
         Validate body:
           validateRequestParameters: true
@@ -142,10 +143,8 @@ paths:
         httpMethod: POST
         payloadFormatVersion: "1.0"
         timeoutInMillis: 10000
+        passthroughBehavior: "when_no_match"
         type: aws_proxy
         uri:
-          Fn::Sub: ${ApiHandlerFunction.Arn}
-      x-amazon-apigateway-request-validators:
-        Validate body:
-          validateRequestParameters: true
-          validateRequestBody: true
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiHandlerFunction.Arn}/invocations"
+      

@@ -4,6 +4,11 @@ Transform: AWS::Serverless-2016-10-31
 Description: Concert API example application
 
 
+Globals:
+  Api:
+    OpenApiVersion: 3.0.3
+
+
 Parameters:
   env:
     Type: String
@@ -13,6 +18,12 @@ Parameters:
       - test
       - prod
     Description: Deployment environment, e.g. dev for development
+
+
+Conditions:
+  IsEnvProd: !Equals 
+    - !Ref env
+    - prod
 
 
 Resources:
@@ -42,11 +53,11 @@ Resources:
   ApiHandlerFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: index.handler
+      Handler: index.lambda_handler
       Runtime: python3.9
       CodeUri: './lambda/concerts_api_handler/src'
       Layers:
-        - !Sub 'arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:40'
+        - !Sub 'arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPython:39'
       Tracing: Active
       Timeout: 120
       Architectures:
@@ -54,6 +65,11 @@ Resources:
       Environment:
         Variables: 
           TABLE_NAME: !Ref ConcertsTable
+          LOG_LEVEL: !If [IsEnvProd, "WARNING", "INFO"]
+          POWERTOOLS_LOGGER_LOG_EVENT: !If [IsEnvProd, false, true]
+          POWERTOOLS_SERVICE_NAME: concerts_api_handler
+          POWERTOOLS_LOGGER_SAMPLE_RATE: 0.1
+
       Policies:
         - AWSLambdaExecute
         - Version: '2012-10-17' 
@@ -77,8 +93,14 @@ Resources:
       Tags:
         Application: Concerts
         Environment: !Ref env
-    
-    # TODO Allow API GW to execute Lambda
+
+  LambdaInvocationPermission:
+    Type: AWS::Lambda::Permission
+    Properties: 
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt ApiHandlerFunction.Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ConcertsApi}/*/*/*"
 
 Outputs:
   ConcertsApiUrl:

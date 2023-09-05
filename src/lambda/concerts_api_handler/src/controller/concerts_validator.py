@@ -2,17 +2,15 @@ def validate_get_concerts_event(event: dict) -> None:
     """
     Validates a GET concerts Lambda event
 
-    Parameters:
-        event (dict):       Must be DEFINED
-            artist (str):   Must have LENGTH > 2
-
     Example:
         self.validate_get_concerts_event(
             { "artist": "Madonna" }
         )
 
-    Raises:
-        An AssertionError in case of invalid properties
+    :param dict event:          Must be DEFINED
+    :param str event.artist:    Must have LENGTH > 2
+
+    :raises AssertionError: In case of invalid properties
     """
     assert bool(event), 'event empty'
 
@@ -29,12 +27,6 @@ def validate_put_concert_event(event: dict) -> None:
     """
     Validates a PUT concert Lambda event
 
-    Parameters:
-        event (dict):               Must be DEFINED
-            artist (str):           Must have LENGTH > 2
-            concert (str):          Must have LENGTH > 2
-            ticket_sales (int):     Must be > 0
-
     Example:
         self.validate_get_concerts_event({
             "artist": "Madonna",
@@ -42,8 +34,12 @@ def validate_put_concert_event(event: dict) -> None:
             "ticket_sales": 5000000
         })
 
-    Raises:
-        An AssertionError in case of invalid properties
+    :param dict event:          Must be DEFINED
+    :param str event.artist:    Must have LENGTH > 2
+    :param str event.concert:   Must have LENGTH > 2
+    :param int ticket_sales:    Must be > 0
+
+    :raises AssertionError: In case of invalid properties
     """
     assert bool(event), 'event empty'
 

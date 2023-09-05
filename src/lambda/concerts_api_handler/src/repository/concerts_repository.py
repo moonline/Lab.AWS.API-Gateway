@@ -5,8 +5,8 @@ import os
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
 
-from model.concer import Concert
-from dynamodb_helpers import to_dynamodb_record
+from model.concert import Concert
+from repository.dynamodb_helpers import to_dynamodb_record
 
 
 class ConcertsRepository:
@@ -19,8 +19,7 @@ class ConcertsRepository:
 
             repository = ConcertsRepository()
 
-        Returns:
-            A ConcertsRepository instance
+        :return: A ConcertsRepository instance
         """
         self.table_name = os.environ.get('TABLE_NAME')
         self.table = dynamodb_resource.Table(self.table_name)
@@ -33,8 +32,7 @@ class ConcertsRepository:
             repository = ConcertsRepository()
             repository.find_concerts_by_artist('Madonna')
 
-        Returns:
-            A list of concerts
+        :return: A list of concerts
         """
         query_response = self.table.query(
             Select='ALL_ATTRIBUTES',
@@ -55,8 +53,7 @@ class ConcertsRepository:
                 'ticket_sales': 80000
             })
 
-        Returns:
-            The added concert
+        :return: The added concert
         """
         put_response = self.table.put_item(
             Item=to_dynamodb_record(concert),
