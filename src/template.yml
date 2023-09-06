@@ -4,11 +4,6 @@ Transform: AWS::Serverless-2016-10-31
 Description: Concert API example application
 
 
-Globals:
-  Api:
-    OpenApiVersion: 3.0.3
-
-
 Parameters:
   env:
     Type: String
@@ -69,14 +64,13 @@ Resources:
           POWERTOOLS_LOGGER_LOG_EVENT: !If [IsEnvProd, false, true]
           POWERTOOLS_SERVICE_NAME: concerts_api_handler
           POWERTOOLS_LOGGER_SAMPLE_RATE: 0.1
-
       Policies:
         - AWSLambdaExecute
         - Version: '2012-10-17' 
           Statement:
             - Effect: Allow
               Action:
-                - dynamodb:GetItem
+                - dynamodb:Query
                 - dynamodb:PutItem
               Resource: !GetAtt ConcertsTable.Arn
 
@@ -98,7 +92,7 @@ Resources:
     Type: AWS::Lambda::Permission
     Properties: 
       Action: lambda:InvokeFunction
-      FunctionName: !GetAtt ApiHandlerFunction.Arn
+      FunctionName: !Ref ApiHandlerFunction
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ConcertsApi}/*/*/*"
 

@@ -92,7 +92,7 @@ paths:
           $ref: "#/components/responses/InternalServerError"
       x-amazon-apigateway-integration:
         httpMethod: POST
-        payloadFormatVersion: "1.0"
+        payloadFormatVersion: "2.0"
         timeoutInMillis: 10000
         passthroughBehavior: "when_no_match"
         type: aws_proxy
@@ -141,7 +141,7 @@ paths:
           $ref: "#/components/responses/InternalServerError"
       x-amazon-apigateway-integration:
         httpMethod: POST
-        payloadFormatVersion: "1.0"
+        payloadFormatVersion: "2.0"
         timeoutInMillis: 10000
         passthroughBehavior: "when_no_match"
         type: aws_proxy

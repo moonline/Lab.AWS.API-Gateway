@@ -56,3 +56,10 @@ aws cloudformation delete-stack --stack-name concerts-api-dev
 ## Resources
 
 * Python doc comments with Sphinx: https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html#python-signatures
+
+
+## Try it out
+
+### List concerts
+
+Open https://{API_ID}.execute-api.eu-central-1.amazonaws.com/dev/concerts?artist=Madonna in your browser (replace API_ID by the actual ID)

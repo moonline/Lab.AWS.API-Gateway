@@ -14,9 +14,9 @@ def validate_get_concerts_event(event: dict) -> None:
     """
     assert bool(event), 'event empty'
 
-    assert not bool(
-        set(event.keys()) - set(('artist'))
-    ), 'Unexpected event. Expected only concerts parameter.'
+    expected_parameters = set(['artist'])
+    unexpected_parameters = set(event.keys()) - expected_parameters
+    assert not bool(unexpected_parameters), f'Unexpected event parameters: {",".join(unexpected_parameters)}. Expected only: {",".join(expected_parameters)}'
 
     artist = event.get('artist')
 
