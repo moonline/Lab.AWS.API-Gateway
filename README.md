@@ -12,6 +12,27 @@ A basic API Gateway example with Lambda Powertools router:
 * Logging: Powertools logger
 * Tracing: Powertools tracer
 
+```mermaid
+classDiagram
+
+class app {
+   get_concerts()
+   put_concert()
+}
+app --> ConcertController
+
+class ConcertController {
+   get_concerts_action()
+   put_concert_action()
+}
+ConcertController --> ConcertRepository
+
+class ConcertRepository {
+   find_concert_by_artist()
+   create_concert()
+}
+```
+
 
 ## Development
 
