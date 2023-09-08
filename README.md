@@ -22,13 +22,13 @@ Table[("`
 `")] -->|Concerts| Handler
 ```
 
-* OpenAPI 3 template
+* OpenAPI 3.0 template
 * [Lambda Powertools for Python](https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/api_gateway/)
 * Modular handler Lambda:
     * Request router (Powertools APIGatewayHttpResolver): [index.py](./src/lambda/concerts_api_handler/index.py)
-    * Controller: [controller/concerts_controller.py](./src/lambda/concerts_api_handler/controller/concerts_controller.py)
-    * Model: [model/concert.py](./src/lambda/concerts_api_handler/model/concert.py)
-    * Repository: [repository/concerts_repository.py](./src/lambda/concerts_api_handler/repository/concerts_repository.py)
+    * Controller: [controller/concerts_controller.py](./src/lambda/concerts_api_handler/src/controller/concerts_controller.py)
+    * Model: [model/concert.py](./src/lambda/concerts_api_handler/src/model/concert.py)
+    * Repository: [repository/concerts_repository.py](./src/lambda/concerts_api_handler/src/repository/concerts_repository.py)
 * Logging: Powertools logger
 * Tracing: Powertools tracer
 
