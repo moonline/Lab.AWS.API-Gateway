@@ -60,6 +60,7 @@ class Concert {
    string artist
    string concert
    int ticket_sales
+   string created_date
 }
 
 class ConcertRepository {
