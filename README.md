@@ -98,6 +98,11 @@ sam deploy --config-env dev
 ```
 
 ```sh
+# Develop interactively
+sam sync --stack-name concerts-api-dev --watch
+```
+
+```sh
 # Stack outputs
 sam list stack-outputs --stack-name concerts-api-dev
 ```
@@ -116,6 +121,15 @@ aws cloudformation delete-stack --stack-name concerts-api-dev
 
 ## Try it out
 
+### Create a concert
+
+```sh
+# Replace API_ID by the actual ID
+curl -X PUT --location 'https://{API_ID}.execute-api.eu-central-1.amazonaws.com/dev/concerts' \
+    -H 'Content-Type: application/json' \
+    -d '{"artist":"Madonna","concert":"This is Madonna 2023","ticket_sales": 5000000 }'
+```
+
 ### List concerts
 
-Open https://{API_ID}.execute-api.eu-central-1.amazonaws.com/dev/concerts?artist=Madonna in your browser (replace API_ID by the actual ID)
+Open [https://{API_ID}.execute-api.eu-central-1.amazonaws.com/dev/concerts?artist=Madonna](https://{API_ID}.execute-api.eu-central-1.amazonaws.com/dev/concerts?artist=Madonna) in your browser (replace API_ID by the actual ID)
