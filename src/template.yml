@@ -44,6 +44,14 @@ Resources:
         - Key: Environment
           Value: !Ref env
 
+  # Force lambda logs to be retained only 1 week
+  ApiHandlerFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DependsOn: [ ApiHandlerFunction ]
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${ApiHandlerFunction}
+      RetentionInDays: 7
+
   # Reference https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
   ApiHandlerFunction:
     Type: AWS::Serverless::Function
