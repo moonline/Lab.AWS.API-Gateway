@@ -2,15 +2,71 @@
 
 A basic API Gateway example with Lambda Powertools router:
 
+```mermaid
+flowchart LR
+
+API("`
+   AWS API Gateway
+   ConcertsAPI
+`") -->|invoke| Handler
+
+Handler("`
+   AWS Lambda
+   concerts_api_handler
+`") -->|query| Table
+Handler -->|response| API
+
+Table[("`
+   AWS DynamoDB
+   ConcertsTable
+`")] -->|Concerts| Handler
+```
+
 * OpenAPI 3 template
 * [Lambda Powertools for Python](https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/api_gateway/)
 * Modular handler Lambda:
-    * Request router: [index.py](./src/lambda/concerts_api_handler/index.py)
+    * Request router (Powertools APIGatewayHttpResolver): [index.py](./src/lambda/concerts_api_handler/index.py)
     * Controller: [controller/concerts_controller.py](./src/lambda/concerts_api_handler/controller/concerts_controller.py)
     * Model: [model/concert.py](./src/lambda/concerts_api_handler/model/concert.py)
     * Repository: [repository/concerts_repository.py](./src/lambda/concerts_api_handler/repository/concerts_repository.py)
 * Logging: Powertools logger
 * Tracing: Powertools tracer
+
+```mermaid
+classDiagram
+
+class APIGatewayHttpResolver {
+   get()
+   put()
+   resolve()
+}
+
+router --|> APIGatewayHttpResolver
+router: get_concerts()
+router: put_concert()
+router --> ConcertController: resolve route
+
+class ConcertController {
+   get_concerts_action()
+   put_concert_action()
+}
+ConcertController --> ConcertRepository: Find / Create concert(s)
+ConcertController --> concert_validator: Validate event
+
+concert_validator: validate_get_concerts_event()
+concert_validator: validate_put_concert_event()
+
+class Concert {
+   string artist
+   string concert
+   int ticket_sales
+}
+
+class ConcertRepository {
+   find_concert_by_artist()
+   create_concert()
+}
+```
 
 
 ## Development
