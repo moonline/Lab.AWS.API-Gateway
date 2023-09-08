@@ -25,7 +25,8 @@ def get_concerts() -> list[dict]:
             {
                 "artist": "Madonna",
                 "concert": "This is Madonna 2023",
-                "ticket_sales": 5000000
+                "ticket_sales": 5000000,
+                "created_date": "2023-09-08T14:47:29.915661"
             },
             ...
         ]
@@ -43,15 +44,16 @@ def get_concerts() -> list[dict]:
 def put_concert() -> dict:
     """
     Example:
-        curl --location 'https://{API_URL}/test/concerts?artist=Madonna'
-            -H 'Content-Type: application/json' 
+        curl -X PUT --location 'https://vqi6qrgeai.execute-api.eu-central-1.amazonaws.com/dev/concerts' \
+            -H 'Content-Type: application/json' \
             -d '{"artist":"Madonna","concert":"This is Madonna 2023","ticket_sales": 5000000}'
 
     :return: The created concert. Example:
         {
             "artist": "Madonna",
             "concert": "This is Madonna 2023",
-            "ticket_sales": 5000000
+            "ticket_sales": 5000000,
+            "created_date": "2023-09-08T14:47:29.915661"
         }
     """
     body: dict = app.current_event.json_body

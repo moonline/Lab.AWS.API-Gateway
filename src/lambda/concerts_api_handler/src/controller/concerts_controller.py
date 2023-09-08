@@ -38,7 +38,8 @@ class ConcertsController:
                 {
                     "artist": "Madonna",
                     "concert": "This is Madonna 2023",
-                    "ticket_sales": 5000000
+                    "ticket_sales": 5000000,
+                    "created_date": "2023-09-08T14:47:29.915661"
                 },
                 ...
             ]
@@ -60,7 +61,7 @@ class ConcertsController:
     def put_concert_action(self, parameters: dict) -> Concert:
         """
         Example:
-            controller.get_concerts_action({
+            controller.put_concert_action({
                 "artist": "Madonna",
                 "concert": "This is Madonna 2023",
                 "ticket_sales": 5000000
@@ -70,7 +71,8 @@ class ConcertsController:
             {
                 "artist": "Madonna",
                 "concert": "This is Madonna 2023",
-                "ticket_sales": 5000000
+                "ticket_sales": 5000000,
+                "created_date": "2023-09-08T14:47:29.915661"
             }
 
         :raises BadRequestError: For validation errors. Example:

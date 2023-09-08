@@ -1,16 +1,19 @@
 from __future__ import annotations
 from typing import TypedDict
 import os
+from datetime import datetime
 
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
 
 from model.concert import Concert
-from repository.dynamodb_helpers import to_dynamodb_record
+
+
+dynamodb_resource = boto3.resource('dynamodb')
 
 
 class ConcertsRepository:
-    def __init__(self, dynamodb_resource=boto3.resource('dynamodb')) -> ConcertsRepository:
+    def __init__(self, dynamodb_resource=dynamodb_resource) -> ConcertsRepository:
         """
         Example:
             os.environ['TABLE_NAME'] = 'concerts'
@@ -21,8 +24,8 @@ class ConcertsRepository:
 
         :return: A ConcertsRepository instance
         """
-        self.table_name = os.environ.get('TABLE_NAME')
-        self.table = dynamodb_resource.Table(self.table_name)
+        table_name = os.environ.get('TABLE_NAME')
+        self.dynamodb_table = dynamodb_resource.Table(table_name)
 
     def find_concerts_by_artist(self, artist: str) -> list[dict]:
         """
@@ -34,7 +37,7 @@ class ConcertsRepository:
 
         :return: A list of concerts
         """
-        query_response = self.table.query(
+        query_response = self.dynamodb_table.query(
             Select='ALL_ATTRIBUTES',
             KeyConditionExpression=Key('artist').eq(artist)
         )
@@ -55,8 +58,15 @@ class ConcertsRepository:
 
         :return: The added concert
         """
-        put_response = self.table.put_item(
-            Item=to_dynamodb_record(concert),
-            ReturnValues='ALL_NEW'
+        record = {
+            **concert,
+            'created_date': datetime.now().isoformat()
+        }
+        put_response = self.dynamodb_table.put_item(
+            Item=record,
+            ReturnValues='ALL_OLD'
         )
-        return put_response['Attributes']
+        if put_response['ResponseMetadata']['HTTPStatusCode'] == 200:
+            return record
+        else:
+            raise Exception("An error occured when storing the concert")

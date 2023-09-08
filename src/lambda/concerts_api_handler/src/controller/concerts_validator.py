@@ -43,9 +43,9 @@ def validate_put_concert_event(event: dict) -> None:
     """
     assert bool(event), 'event empty'
 
-    assert not bool(
-        set(event.keys()) - set(('artist', 'concert', 'sales'))
-    ), 'Unexpected event. Expected only concerts parameter.'
+    expected_parameters = set(['artist', 'concert', 'ticket_sales'])
+    unexpected_parameters = set(event.keys()) - expected_parameters
+    assert not bool(unexpected_parameters), f'Unexpected event parameters: {",".join(unexpected_parameters)}. Expected only: {",".join(expected_parameters)}'
 
     artist = event.get('artist')
     assert bool(artist) and len(artist) > 2, 'artist must have minimal 2 characters'
