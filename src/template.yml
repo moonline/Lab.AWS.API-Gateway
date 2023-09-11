@@ -3,7 +3,6 @@ Transform: AWS::Serverless-2016-10-31
 
 Description: Concert API example application
 
-
 Parameters:
   env:
     Type: String
@@ -14,12 +13,10 @@ Parameters:
       - prod
     Description: Deployment environment, e.g. dev for development
 
-
 Conditions:
-  IsEnvProd: !Equals 
+  IsEnvProd: !Equals
     - !Ref env
     - prod
-
 
 Resources:
   # Reference https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-dynamodb-table.html
@@ -27,7 +24,7 @@ Resources:
     Type: AWS::DynamoDB::Table
     Properties:
       BillingMode: PAY_PER_REQUEST
-      TableName: !Sub 'concerts-${env}'
+      TableName: !Sub "concerts-${env}"
       AttributeDefinitions:
         - AttributeName: artist
           AttributeType: S
@@ -47,10 +44,15 @@ Resources:
   # Force lambda logs to be retained only 1 week
   ApiHandlerFunctionLogGroup:
     Type: AWS::Logs::LogGroup
-    DependsOn: [ ApiHandlerFunction ]
+    DependsOn: [ApiHandlerFunction]
     Properties:
-      LogGroupName: !Sub /aws/lambda/${ApiHandlerFunction}
+      LogGroupName: !Sub "/aws/lambda/${ApiHandlerFunction}"
       RetentionInDays: 7
+      Tags:
+        - Key: Application
+          Value: Concerts
+        - Key: Environment
+          Value: !Ref env
 
   # Reference https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
   ApiHandlerFunction:
@@ -58,15 +60,15 @@ Resources:
     Properties:
       Handler: index.lambda_handler
       Runtime: python3.9
-      CodeUri: './lambda/concerts_api_handler/src'
+      CodeUri: "./lambda/concerts_api_handler/src"
       Layers:
-        - !Sub 'arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPython:39'
+        - !Sub "arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:43"
       Tracing: Active
-      Timeout: 120
+      Timeout: 10
       Architectures:
         - arm64
       Environment:
-        Variables: 
+        Variables:
           TABLE_NAME: !Ref ConcertsTable
           LOG_LEVEL: !If [IsEnvProd, "WARNING", "INFO"]
           POWERTOOLS_LOGGER_LOG_EVENT: !If [IsEnvProd, false, true]
@@ -74,13 +76,16 @@ Resources:
           POWERTOOLS_LOGGER_SAMPLE_RATE: 0.1
       Policies:
         - AWSLambdaExecute
-        - Version: '2012-10-17' 
+        - Version: "2012-10-17"
           Statement:
             - Effect: Allow
               Action:
                 - dynamodb:Query
                 - dynamodb:PutItem
               Resource: !GetAtt ConcertsTable.Arn
+      Tags:
+        Application: Concerts
+        Environment: !Ref env
 
   # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-api.html
   ConcertsApi:
@@ -88,17 +93,17 @@ Resources:
     Properties:
       StageName: !Ref env
       DefinitionBody:
-        'Fn::Transform':
-          Name: 'AWS::Include'
+        "Fn::Transform":
+          Name: "AWS::Include"
           Parameters:
-            Location: './api/concerts.yaml'
+            Location: "./api/concerts.yaml"
       Tags:
         Application: Concerts
         Environment: !Ref env
 
   LambdaInvocationPermission:
     Type: AWS::Lambda::Permission
-    Properties: 
+    Properties:
       Action: lambda:InvokeFunction
       FunctionName: !Ref ApiHandlerFunction
       Principal: apigateway.amazonaws.com
@@ -107,4 +112,4 @@ Resources:
 Outputs:
   ConcertsApiUrl:
     Description: The URL of the concerts API
-    Value: !Sub 'https://${ConcertsApi}.execute-api.${AWS::Region}.amazonaws.com/${env}'
+    Value: !Sub "https://${ConcertsApi}.execute-api.${AWS::Region}.amazonaws.com/${env}"

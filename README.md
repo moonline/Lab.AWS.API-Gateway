@@ -82,6 +82,8 @@ class ConcertRepository {
 ### Recommended Visual Studio Code plugins
 
 * https://marketplace.visualstudio.com/items?itemName=tamasfe.even-better-toml
+* https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml
+* https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 
 ## Deployment
