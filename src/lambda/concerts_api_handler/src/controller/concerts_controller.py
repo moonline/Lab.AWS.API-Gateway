@@ -23,7 +23,7 @@ class ConcertsController:
         """
         self.repository = repository
 
-    def get_concerts_action(self, parameters: dict) -> list[Concert]:
+    def get_concerts_action(self, parameters: dict, body: dict) -> list[Concert]:
         """
         Example:
             controller.get_concerts_action(
@@ -58,7 +58,7 @@ class ConcertsController:
         return self.repository.find_concerts_by_artist(parameters.get('artist'))
         
         
-    def put_concert_action(self, parameters: dict) -> Concert:
+    def put_concert_action(self, parameters: dict, body: dict) -> Concert:
         """
         Example:
             controller.put_concert_action({
@@ -82,8 +82,8 @@ class ConcertsController:
             }
         """
         try:
-            validate_put_concert_event(parameters)
+            validate_put_concert_event(body)
         except AssertionError as error:
             raise BadRequestError(f'Parameter invalid! {str(error)}')
 
-        return self.repository.create_concert(parameters)
+        return self.repository.create_concert(body)
