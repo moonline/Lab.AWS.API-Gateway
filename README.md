@@ -115,6 +115,8 @@ sam list stack-outputs --stack-name concerts-api-dev
 sam delete --config-env dev
 # or
 aws cloudformation delete-stack --stack-name concerts-api-dev
+# To remove all SAM resources completely, als the stack aws-sam-cli-managed-default needs to be deleted
+aws cloudformation delete-stack --stack-name aws-sam-cli-managed-default
 ```
 
 ## Resources

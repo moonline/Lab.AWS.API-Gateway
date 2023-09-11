@@ -39,3 +39,13 @@ confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
 parameter_overrides = "env=\"dev\""
 image_repositories = []
+
+[prod.deploy.parameters]
+stack_name = "concerts-api-prod"
+resolve_s3 = true
+s3_prefix = "concerts-api-prod"
+region = "eu-central-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "env=\"prod\""
+image_repositories = []
