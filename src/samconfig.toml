@@ -30,15 +30,17 @@ warm_containers = "EAGER"
 [default.local_start_lambda.parameters]
 warm_containers = "EAGER"
 
+
 [dev.deploy.parameters]
 stack_name = "concerts-api-dev"
 resolve_s3 = true
 s3_prefix = "concerts-api-dev"
 region = "eu-central-1"
-confirm_changeset = true
+confirm_changeset = false
 capabilities = "CAPABILITY_IAM"
 parameter_overrides = "env=\"dev\""
 image_repositories = []
+
 
 [prod.deploy.parameters]
 stack_name = "concerts-api-prod"

@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import TypedDict
 import os
 from datetime import datetime
+from functools import reduce
 
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
@@ -24,8 +25,8 @@ class ConcertsRepository:
 
         :return: A ConcertsRepository instance
         """
-        table_name = os.environ.get('TABLE_NAME')
-        self.dynamodb_table = dynamodb_resource.Table(table_name)
+        self.table_name = os.environ.get('TABLE_NAME')
+        self.dynamodb_table = dynamodb_resource.Table(self.table_name)
 
     def find_concerts_by_artist(self, artist: str) -> list[dict]:
         """
@@ -37,13 +38,18 @@ class ConcertsRepository:
 
         :return: A list of concerts
         """
-        query_response = self.dynamodb_table.query(
+        paginator = self.dynamodb_table.meta.client.get_paginator('query')
+        page_iterator = paginator.paginate(
+            TableName=self.table_name,
             Select='ALL_ATTRIBUTES',
             KeyConditionExpression=Key('artist').eq(artist)
         )
-        return query_response['Items']
-        
-        
+        return reduce(
+            lambda a, b: a+b,
+            [page['Items'] for page in page_iterator]
+        )
+
+
     def create_concert(self, concert: Concert) -> Concert:
         """
         Add a new concert to the DB
