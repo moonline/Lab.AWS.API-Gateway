@@ -1,6 +1,30 @@
 # Lab.AWS.API-Gateway
 
-A basic API Gateway example with Lambda Powertools router:
+**Creating a serverless API using AWS SAM, OpenAPI 3.0 and Lambda Powertools - writing clean Code with Python**
+
+"Work smart, not hard" means using the best tools for the job. Developers also say "be lazy, write less code".
+Serverless technology does not only allow to outsource server and network maintenance and focus on the application, it also allows to focus on cleaner code.
+
+This article brings together several tweeks of the serverless world of the last years:
+
+* AWS Serverless Application Model (SAM) - [An open-source framework for building serverless applications](https://aws.amazon.com/serverless/sam/)
+* OpenAPI 3.0 - [An open-source API definition language supported by AWS API Gateway](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-swagger-extensions.html)
+* Powertools for AWS Lambda - [A developer toolkit to implement Serverless best practices and increase developer velocity](https://docs.powertools.aws.dev/lambda/python/latest/)
+
+It puts also a strong focus on clean code:
+
+* MVC pattern - https://python.plainenglish.io/model-view-controller-mvc-pattern-in-python-a-beginners-guide-b0d9855068eb
+* Repository pattern - https://medium.com/@pererikbergman/repository-design-pattern-e28c0f3e4a30
+* Validators
+* Router
+
+## High level architecture
+
+A basic API Gateway setup with Lambda Powertools consists of:
+
+* The actual API (AWS API Gateway), which offers the REST API
+* The handler (AWS Lambda), which processes the requests
+* A table (AWS DynamoDB), where the data is stored
 
 ```mermaid
 flowchart LR
@@ -21,6 +45,8 @@ Table[("`
    ConcertsTable
 `")] -->|Concerts| Handler
 ```
+
+## Implementation details
 
 * OpenAPI 3.0 template
 * [Lambda Powertools for Python](https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/api_gateway/)
