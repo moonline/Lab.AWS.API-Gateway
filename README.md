@@ -26,6 +26,7 @@ A basic API Gateway setup with Lambda Powertools consists of:
 * The handler (AWS Lambda), which processes the requests
 * A table (AWS DynamoDB), where the data is stored
 
+<!-- Edit: https://mermaid.live/ -->
 ```mermaid
 flowchart LR
 
@@ -48,8 +49,44 @@ Table[("`
 
 ## Implementation details
 
-* OpenAPI 3.0 template
-* [Lambda Powertools for Python](https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/api_gateway/)
+### The API Gateway - The entrypoint
+
+The OpenAPI 3.0 specification allows us, to define an API in an opensource format and deploy the API Gateway based on it. Furthermore we could generate a Swagger page, based on it.
+
+For each endpoint, a "path" needs to be defined:
+
+```yaml
+paths:
+  /concerts:
+    get:
+      description: Returns a list of concerts
+      parameters:
+        - in: query
+          name: artist
+          schema:
+            type: string
+          description: Artist to filter the concerts
+      responses:
+        200:
+          description: Successfully retrieved concerts
+```
+
+For the integration with Lambda, AWS offers a proxy integration:
+
+```yaml
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        payloadFormatVersion: "2.0"
+        timeoutInMillis: 10000
+        passthroughBehavior: "when_no_match"
+        type: aws_proxy
+        uri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiHandlerFunction.Arn}/invocations"
+```
+
+
+### The API handler Lambda function - The worker
+
 * Modular handler Lambda:
     * Request router (Powertools APIGatewayHttpResolver): [index.py](./src/lambda/concerts_api_handler/index.py)
     * Controller: [controller/concerts_controller.py](./src/lambda/concerts_api_handler/src/controller/concerts_controller.py)
@@ -58,6 +95,7 @@ Table[("`
 * Logging: Powertools logger
 * Tracing: Powertools tracer
 
+<!-- Edit: https://mermaid.live/ -->
 ```mermaid
 classDiagram
 
