@@ -49,13 +49,15 @@ Table[("`
 
 ## Implementation details
 
-### The API Gateway - The entrypoint
+### The API Gateway entrypoint
 
-The OpenAPI 3.0 specification allows us, to define an API in an opensource format and deploy the API Gateway based on it. Furthermore we could generate a Swagger page, based on it.
+The OpenAPI 3.0 specification allows us, to define an API in an interoperable opensource format and deploy the API Gateway based on it. Furthermore we could generate a Swagger documentation out of it.
 
 For each endpoint, a "path" needs to be defined:
 
 ```yaml
+# src/api/concerts.yaml
+
 paths:
   /concerts:
     get:
@@ -84,16 +86,40 @@ For the integration with Lambda, AWS offers a proxy integration:
           Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiHandlerFunction.Arn}/invocations"
 ```
 
+The OpenAPI specification can then be linked into the SAM template, to be deployed:
 
-### The API handler Lambda function - The worker
+```yaml
+# src/template.yml
 
-* Modular handler Lambda:
-    * Request router (Powertools APIGatewayHttpResolver): [index.py](./src/lambda/concerts_api_handler/index.py)
-    * Controller: [controller/concerts_controller.py](./src/lambda/concerts_api_handler/src/controller/concerts_controller.py)
-    * Model: [model/concert.py](./src/lambda/concerts_api_handler/src/model/concert.py)
-    * Repository: [repository/concerts_repository.py](./src/lambda/concerts_api_handler/src/repository/concerts_repository.py)
-* Logging: Powertools logger
-* Tracing: Powertools tracer
+  ConcertsApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: !Ref env
+      DefinitionBody:
+        "Fn::Transform":
+          Name: "AWS::Include"
+          Parameters:
+            Location: "./api/concerts.yaml"
+```
+
+For details see [concerts.yaml](./src/api/concerts.yaml) and [template.yml](./src/template.yml).
+
+
+### The API handler Lambda function
+
+To build a single API handler Lambda, with shared resource like models or repositories, [Powertools Event Handler for REST API](https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/api_gateway/) provides a router, called resolver.
+
+Using this router as an entry point for the Lambda function, a MVC like, well structured Lambda function can be implemented, containing the following components:
+
+* Request router (Powertools APIGatewayHttpResolver): [index.py](./src/lambda/concerts_api_handler/index.py), responsible to route the request to the corresponding controller action, based on the path information from API Gateway, which it get's embedded in the event.
+* Controller: [controller/concerts_controller.py](./src/lambda/concerts_api_handler/src/controller/concerts_controller.py), responsible to process the request parameters, validate them and invoke the repository, to get or create Concerts.
+* Model: [model/concert.py](./src/lambda/concerts_api_handler/src/model/concert.py), represents a Concert object.
+* Repository: [repository/concerts_repository.py](./src/lambda/concerts_api_handler/src/repository/concerts_repository.py), responsible to persist and retrieve concerts records to and from the DynamoDB database.
+
+Furthermore Powertools offers nice utilities for:
+
+* Logging: [Powertools logger](https://docs.powertools.aws.dev/lambda/python/latest/core/logger/)
+* Tracing: [Powertools tracer](https://docs.powertools.aws.dev/lambda/python/latest/core/tracer/)
 
 <!-- Edit: https://mermaid.live/ -->
 ```mermaid
@@ -131,6 +157,64 @@ class ConcertRepository {
    find_concert_by_artist()
    create_concert()
 }
+```
+
+SAM's "Serverless::Function" resource simplifies the deployment of such a Lambda function:
+
+```yml
+# src/template.yml
+
+  ApiHandlerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.lambda_handler
+      Runtime: python3.9
+      CodeUri: "./lambda/concerts_api_handler/src"
+      Layers:
+        - !Sub "arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:43"
+      Tracing: Active
+      Timeout: 10
+      Architectures:
+        - arm64
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref ConcertsTable
+          LOG_LEVEL: !If [IsEnvProd, "WARNING", "INFO"]
+          POWERTOOLS_LOGGER_LOG_EVENT: !If [IsEnvProd, false, true]
+          POWERTOOLS_SERVICE_NAME: concerts_api_handler
+      Policies:
+        - AWSLambdaExecute
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:Query
+                - dynamodb:PutItem
+              Resource: !GetAtt ConcertsTable.Arn
+```
+
+### The database
+
+To store concerts, a simple DynamoDB is needed:
+
+```yaml
+# src/template.yml
+
+  ConcertsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      TableName: !Sub "concerts-${env}"
+      AttributeDefinitions:
+        - AttributeName: artist
+          AttributeType: S
+        - AttributeName: concert
+          AttributeType: S
+      KeySchema:
+        - AttributeName: artist
+          KeyType: HASH
+        - AttributeName: concert
+          KeyType: RANGE
 ```
 
 
