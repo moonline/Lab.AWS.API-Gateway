@@ -5,7 +5,7 @@
 "Work smart, not hard" means using the best tools for the job. Developers also say "be lazy, write less code".
 Serverless technology does not only allow to outsource server and network maintenance and focus on the application, it also allows to focus on cleaner code.
 
-This article brings together several tweeks of the serverless world of the last years:
+This article brings together several tweaks of the serverless world of the last years:
 
 * **AWS Serverless Application Model** (SAM) - [An open-source framework for building serverless applications on AWS](https://aws.amazon.com/serverless/sam/)
 * **OpenAPI** 3.0 - [An open-source API definition language supported by AWS API Gateway](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-swagger-extensions.html)
@@ -51,7 +51,7 @@ Table[("`
 
 ### Entrypoint: The API Gateway
 
-The OpenAPI 3.0 specification allows, to define an API in an interoperable opensource format and deploy an API Gateway based on it. Furthermore it can be used to generate a Swagger documentation.
+The OpenAPI 3.0 specification allows, to define an API in an interoperable open-source format and deploy an API Gateway based on it. Furthermore it can be used to generate a Swagger documentation.
 
 For each endpoint, a "path" needs to be defined:
 
@@ -277,7 +277,7 @@ sam list stack-outputs --stack-name concerts-api-dev
 sam delete --config-env dev
 # or
 aws cloudformation delete-stack --stack-name concerts-api-dev
-# To remove all SAM resources completely, als the stack aws-sam-cli-managed-default needs to be deleted
+# To remove all SAM resources completely, also the stack aws-sam-cli-managed-default needs to be deleted
 aws cloudformation delete-stack --stack-name aws-sam-cli-managed-default
 ```
 
