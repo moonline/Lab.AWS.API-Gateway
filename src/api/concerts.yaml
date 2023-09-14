@@ -19,6 +19,18 @@ components:
       required:
         - code
         - message
+    CreateConcert:
+      type: object
+      properties:
+        artist:
+          description: The name of the artist of the concert
+          type: string
+        concert:
+          description: The name of the concert
+          type: string
+        ticket_sales:
+          description: Sales made for the concert
+          type: string
     Concert:
       type: object
       properties:
@@ -31,6 +43,9 @@ components:
         ticket_sales:
           description: Sales made for the concert
           type: string
+        created_date:
+          description: Create date in ISO format
+          type: string
     ListConcertsByArtistResponse:
       description: Reponds a list of concerts that match with the given artist
       type: array
@@ -42,12 +57,6 @@ components:
   responses:
     BadRequest:
       description: The provided approval request ended in an incorrect result.
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/ErrorResponse"
-    NotFound:
-      description: The specified resource was not found.
       content:
         application/json:
           schema:
@@ -86,8 +95,6 @@ paths:
                   - $ref: "#/components/schemas/ListConcertsByArtistResponse"
         400:
           $ref: "#/components/responses/BadRequest"
-        404:
-          $ref: "#/components/responses/NotFound"
         500:
           $ref: "#/components/responses/InternalServerError"
       x-amazon-apigateway-integration:
@@ -109,7 +116,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Concert"
+              $ref: "#/components/schemas/CreateConcert"
             example: |
               {
                 "artist": "Madonna",
@@ -127,12 +134,11 @@ paths:
                 {
                   "artist": "Madonna",
                   "concert": "This is Madonna 2023",
-                  "ticket_sales": 5000000
+                  "ticket_sales": 5000000,
+                  "created_date": "2023-09-08T14:47:29.915661"
                 }
         400:
           $ref: "#/components/responses/BadRequest"
-        404:
-          $ref: "#/components/responses/NotFound"
         500:
           $ref: "#/components/responses/InternalServerError"
       x-amazon-apigateway-integration:
