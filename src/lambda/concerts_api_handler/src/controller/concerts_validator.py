@@ -34,10 +34,10 @@ def validate_put_concert_event(event: dict) -> None:
             "ticket_sales": 5000000
         })
 
-    :param dict event:          Must be DEFINED
-    :param str event.artist:    Must have LENGTH > 2
-    :param str event.concert:   Must have LENGTH > 2
-    :param int ticket_sales:    Must be > 0
+    :param dict event:              Must be DEFINED
+    :param str event.artist:        Must have LENGTH > 2
+    :param str event.concert:       Must have LENGTH > 2
+    :param int event.ticket_sales:  Must be > 0
 
     :raises AssertionError: In case of invalid properties
     """
