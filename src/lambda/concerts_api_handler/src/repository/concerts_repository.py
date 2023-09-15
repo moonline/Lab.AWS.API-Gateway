@@ -23,6 +23,8 @@ class ConcertsRepository:
 
             repository = ConcertsRepository()
 
+        :param boto3.resource dynamodb_resource: A boto3 DynamoDB resource
+
         :return: A ConcertsRepository instance
         """
         self.table_name = os.environ.get('TABLE_NAME')
@@ -35,6 +37,8 @@ class ConcertsRepository:
         Example:
             repository = ConcertsRepository()
             repository.find_concerts_by_artist('Madonna')
+
+        :param string artist: An artist name
 
         :return: A list of concerts
         """
@@ -62,7 +66,9 @@ class ConcertsRepository:
                 'ticket_sales': 80000
             })
 
-        :return: The added concert
+        :param Concert concert: A concert object to be persisted
+
+        :return: The persisted concert
         """
         record = {
             **concert,
