@@ -31,6 +31,10 @@ components:
         ticket_sales:
           description: Sales made for the concert
           type: string
+      required:
+        - artist
+        - concert
+        - ticket_sales
     Concert:
       type: object
       properties:
@@ -46,8 +50,13 @@ components:
         created_date:
           description: Create date in ISO format
           type: string
+      required:
+        - artist
+        - concert
+        - ticket_sales
+        - created_date
     ListConcertsByArtistResponse:
-      description: Reponds a list of concerts that match with the given artist
+      description: Returns a list of concerts matching the given artist
       type: array
       items:
         $ref: "#/components/schemas/Concert"
@@ -56,7 +65,7 @@ components:
 
   responses:
     BadRequest:
-      description: The provided approval request ended in an incorrect result.
+      description: The provided parameters were invalid.
       content:
         application/json:
           schema:
@@ -70,7 +79,7 @@ components:
 
 tags:
   - name: concerts
-    description: Concerts endpoints
+    description: Concert endpoints
 
 paths:
   /concerts:
