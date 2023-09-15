@@ -27,11 +27,14 @@ class ConcertsController:
         """
         Example:
             controller.get_concerts_action(
-                { "artist": "Madonna" }
+                { "artist": "Madonna" },
+                {}
             )
 
-        :param dict parameters: API GW parameters. Example:
+        :param dict parameters: API GW url parameters. Example:
             { "artist": "Madonna" }
+        :param dict body: API GW request body. Example:
+            {}
 
         :return: A list of concerts matching the parameters. Example:
             [
@@ -61,11 +64,23 @@ class ConcertsController:
     def put_concert_action(self, parameters: dict, body: dict) -> Concert:
         """
         Example:
-            controller.put_concert_action({
+            controller.put_concert_action(
+                {},
+                {
+                    "artist": "Madonna",
+                    "concert": "This is Madonna 2023",
+                    "ticket_sales": 5000000
+                }
+            )
+
+        :param dict parameters: API GW url parameters. Example:
+            {}
+        :param dict body: API GW request body. Example:            
+            {
                 "artist": "Madonna",
                 "concert": "This is Madonna 2023",
                 "ticket_sales": 5000000
-            })
+            }
 
         :return: The created concert. Example:
             {
