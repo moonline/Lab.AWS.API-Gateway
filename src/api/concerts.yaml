@@ -1,0 +1,160 @@
+# Validator: https://editor.swagger.io/
+openapi: 3.0.1
+
+info:
+  title: Concerts management API
+  description: A REST API to create and list concerts
+  version: 1.0.0
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+      required:
+        - code
+        - message
+    CreateConcert:
+      type: object
+      properties:
+        artist:
+          description: The name of the artist of the concert
+          type: string
+        concert:
+          description: The name of the concert
+          type: string
+        ticket_sales:
+          description: Sales made for the concert
+          type: string
+      required:
+        - artist
+        - concert
+        - ticket_sales
+    Concert:
+      type: object
+      properties:
+        artist:
+          description: The name of the artist of the concert
+          type: string
+        concert:
+          description: The name of the concert
+          type: string
+        ticket_sales:
+          description: Sales made for the concert
+          type: string
+        created_date:
+          description: Create date in ISO format
+          type: string
+      required:
+        - artist
+        - concert
+        - ticket_sales
+        - created_date
+    ListConcertsByArtistResponse:
+      description: Returns a list of concerts matching the given artist
+      type: array
+      items:
+        $ref: "#/components/schemas/Concert"
+    CreateConcertResponse:
+      $ref: "#/components/schemas/Concert"
+
+  responses:
+    BadRequest:
+      description: The provided parameters were invalid.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    InternalServerError:
+      description: Unexpected error.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+tags:
+  - name: concerts
+    description: Concert endpoints
+
+paths:
+  /concerts:
+    get:
+      operationId: getconcerts
+      description: Returns a list of concerts
+      tags:
+        - list-concerts
+      parameters:
+        - in: query
+          name: artist
+          schema:
+            type: string
+          description: Artist to filter the concerts
+      responses:
+        200:
+          description: Successfully retrieved concerts
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ListConcertsByArtistResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        payloadFormatVersion: "2.0"
+        timeoutInMillis: 10000
+        passthroughBehavior: "when_no_match"
+        type: aws_proxy
+        uri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiHandlerFunction.Arn}/invocations"
+
+    put:
+      operationId: putconcert
+      description: Add a new concert
+      tags:
+        - create-concert
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateConcert"
+            example: |
+              {
+                "artist": "Madonna",
+                "concert": "This is Madonna 2023",
+                "ticket_sales": 5000000
+              }
+      responses:
+        200:
+          description: Successfully added concert
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateConcertResponse"
+              example: |
+                {
+                  "artist": "Madonna",
+                  "concert": "This is Madonna 2023",
+                  "ticket_sales": 5000000,
+                  "created_date": "2023-09-08T14:47:29.915661"
+                }
+        400:
+          $ref: "#/components/responses/BadRequest"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        payloadFormatVersion: "2.0"
+        timeoutInMillis: 10000
+        passthroughBehavior: "when_no_match"
+        type: aws_proxy
+        uri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiHandlerFunction.Arn}/invocations"
