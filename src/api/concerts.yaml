@@ -47,14 +47,14 @@ components:
         ticket_sales:
           description: Sales made for the concert
           type: string
-        created_date:
+        create_date:
           description: Create date in ISO format
           type: string
       required:
         - artist
         - concert
         - ticket_sales
-        - created_date
+        - create_date
     ListConcertsByArtistResponse:
       description: Returns a list of concerts matching the given artist
       type: array
@@ -144,7 +144,7 @@ paths:
                   "artist": "Madonna",
                   "concert": "This is Madonna 2023",
                   "ticket_sales": 5000000,
-                  "created_date": "2023-09-08T14:47:29.915661"
+                  "create_date": "2023-09-08T14:47:29.915661"
                 }
         400:
           $ref: "#/components/responses/BadRequest"

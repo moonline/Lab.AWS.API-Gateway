@@ -3,17 +3,17 @@ from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
 from aws_lambda_powertools.logging import correlation_paths
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-from controller.concerts_controller import ConcertsController
-from repository.concerts_repository import ConcertsRepository
+from controller.concert_controller import ConcertController
+from repository.concert_repository import ConcertRepository
 
 
 tracer = Tracer()
 logger = Logger()
+
+repository = ConcertRepository()
+controller = ConcertController(repository)
+
 router = APIGatewayHttpResolver()
-
-
-repository = ConcertsRepository()
-controller = ConcertsController(repository)
 
 
 @router.get('/concerts')
@@ -21,7 +21,7 @@ controller = ConcertsController(repository)
 def get_concerts() -> list[dict]:
     """
     Example:
-        curl --location 'https://{API_URL}/{STAGE}/concerts?artist=Madonna'
+        curl --location 'https://{API_URL}/{STAGE}/concerts?artist={ARTIST}'
         e.g.
         curl --location 'https://nri2eiw521.execute-api.eu-central-1.amazonaws.com/dev/concerts?artist=Madonna'
 
@@ -31,10 +31,11 @@ def get_concerts() -> list[dict]:
                 "artist": "Madonna",
                 "concert": "This is Madonna 2023",
                 "ticket_sales": 5000000,
-                "created_date": "2023-09-08T14:47:29.915661"
+                "create_date": "2023-09-08T14:47:29.915661"
             },
             ...
         ]
+    :rtype: list
     """
     parameters: dict = router.current_event.query_string_parameters
 
@@ -46,7 +47,7 @@ def get_concerts() -> list[dict]:
 def put_concert() -> dict:
     """
     Example:
-        curl --location 'https://{API_URL}/{STAGE}/concerts' \
+        curl -X PUT --location 'https://{API_URL}/{STAGE}/concerts' \
             -H 'Content-Type: application/json' \
             -d '{ ... }'
         e.g.
@@ -59,8 +60,9 @@ def put_concert() -> dict:
             "artist": "Madonna",
             "concert": "This is Madonna 2023",
             "ticket_sales": 5000000,
-            "created_date": "2023-09-08T14:47:29.915661"
+            "create_date": "2023-09-08T14:47:29.915661"
         }
+    :rtype: dict
     """
     body: dict = router.current_event.json_body
 
@@ -69,5 +71,24 @@ def put_concert() -> dict:
 
 @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_HTTP)
 @tracer.capture_lambda_handler
-def lambda_handler(event: dict, context: LambdaContext) -> dict:
+def handler(event: dict, context: LambdaContext) -> dict:
+    """
+    Powertools router
+
+    :param event: An API Gateway event. Example:
+        {
+            ...
+            'path': '/concerts',
+            'httpMethod': 'GET',
+            'queryStringParameters': {'artist': 'Madonna'},
+            'requestContext': {},
+            ...
+        }
+    :type event: dict
+
+    :param context: Lambda context
+    :type context: dict
+
+    :rtype: json
+    """
     return router.resolve(event, context)

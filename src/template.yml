@@ -58,7 +58,7 @@ Resources:
   ApiHandlerFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: index.lambda_handler
+      Handler: index.handler
       Runtime: python3.9
       CodeUri: "./lambda/concerts_api_handler/src"
       Layers:

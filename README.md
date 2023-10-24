@@ -1,129 +1,93 @@
 # Lab.AWS.API-Gateway
 
-**Creating a serverless API using AWS SAM, OpenAPI 3.0 and Lambda Powertools - writing clean Code with Python**
+A basic serverless API with AWS API Gateway, OpenAPI 3.0, AWS Lambda, Lambda Powertools for Python, AWS DynamoDB and AWS SAM.
 
-"Work smart, not hard" means using the best tools for the job. Developers also say "be lazy, write less code".
-Serverless technology does not only allow to outsource server and network maintenance and focus on the application, it also allows to focus on cleaner code.
+* [AWS API Gateway](https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html)
+* [OpenAPI 3.0](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-swagger-extensions.html)
+* [AWS Lambda](https://docs.aws.amazon.com/lambda/latest/dg/welcome.html)
+* [Python Powertools for AWS Lambda](https://docs.powertools.aws.dev/lambda/python/latest/)
+* [AWS DynamoDB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html)
+* [AWS Serverless Application Model (SAM)](https://aws.amazon.com/serverless/sam/)
 
-This article brings together several tweaks of the serverless world of the last years:
 
-* **AWS Serverless Application Model** (SAM) - [An open-source framework for building serverless applications on AWS](https://aws.amazon.com/serverless/sam/)
-* **OpenAPI** 3.0 - [An open-source API definition language supported by AWS API Gateway](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-swagger-extensions.html)
-* **Powertools for AWS Lambda** - [A developer toolkit to implement Serverless best practices and increase developer velocity](https://docs.powertools.aws.dev/lambda/python/latest/)
-
-It puts also a strong focus on clean code:
+API Handler clean code practices:
 
 * **MVC pattern** - https://python.plainenglish.io/model-view-controller-mvc-pattern-in-python-a-beginners-guide-b0d9855068eb
 * **Repository pattern** - https://medium.com/@pererikbergman/repository-design-pattern-e28c0f3e4a30
 * **Validators**
 * **Router**
 
-## High level architecture
 
-A basic API Gateway setup with Lambda Powertools consists of:
-
-* **The REST API** (AWS API Gateway) - Exposes endpoints and receives requests
-* **The API handler** (AWS Lambda) - Processes the requests
-* **A table** (AWS DynamoDB) - Stores the data
+## Architecture
 
 <!-- Edit: https://mermaid.live/ -->
 ```mermaid
 flowchart LR
 
 API("`
-   AWS API Gateway
-   ConcertsAPI
+    fa:fa-th-large
+    AWS API Gateway
+    ―――――――――
+    Concerts API
 `") -->|invoke| Handler
 
 Handler("`
-   AWS Lambda
-   concerts_api_handler
-`") -->|query| Table
+    fa:fa-code
+    AWS Lambda Function
+    ――――――――――
+    concerts_api_handler
+`") -->|query/put| Database
 Handler -->|response| API
 
-Table[("`
-   AWS DynamoDB
-   ConcertsTable
+Database[("`
+    fa:fa-database
+    AWS DynamoDB
+    ――――――――――
+    concerts table
 `")] -->|Concerts| Handler
 ```
 
-## Implementation details
+### API
 
-### Entrypoint: The API Gateway
+```mermaid
+flowchart LR
+    API("
+        API
+        ――
+        /
+    ")
 
-The OpenAPI 3.0 specification allows, to define an API in an interoperable open-source format and deploy an API Gateway based on it. Furthermore it can be used to generate a Swagger documentation.
+    API --> concerts
 
-For each endpoint, a "path" needs to be defined:
+    concerts["
+        endpoint
+        ―――――
+        concerts/
+    "]
 
-```yaml
-# src/api/concerts.yaml
-
-paths:
-  /concerts:
-    get:
-      description: Returns a list of concerts
-      parameters:
-        - in: query
-          name: artist
-          schema:
-            type: string
-          description: Artist to filter the concerts
-      responses:
-        200:
-          description: Successfully retrieved concerts
+    concerts --> get["
+        GET
+        ―――――――――
+        query parameters:
+        - artist=string
+        returns:
+        - Concert[]
+    "]
+    concerts --> put["
+        PUT
+        ―――――――――
+        request body:
+        - artist: string
+        - concert: string
+        - ticket_sales: number
+        returns:
+        - Concert
+    "]
 ```
 
-For the integration with Lambda, AWS provides a proxy integration:
 
-```yaml
-      x-amazon-apigateway-integration:
-        httpMethod: POST
-        payloadFormatVersion: "2.0"
-        timeoutInMillis: 10000
-        passthroughBehavior: "when_no_match"
-        type: aws_proxy
-        uri:
-          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiHandlerFunction.Arn}/invocations"
-```
+### Handler
 
-Important detail: The payloadFormatVersion must match the API Gateway version. Otherwise the event format will not match and the API will fail with errors like "field httpProtocol can not be found.", because the event structures are not backward-compatible.
-
-The OpenAPI specification can then be linked into the SAM template. Embedding the specification using "AWS::Include" allows to use references, like "${ApiHandlerFunction.Arn}":
-
-```yaml
-# src/template.yml
-
-  ConcertsApi:
-    Type: AWS::Serverless::HttpApi
-    Properties:
-      StageName: !Ref env
-      DefinitionBody:
-        "Fn::Transform":
-          Name: "AWS::Include"
-          Parameters:
-            Location: "./api/concerts.yaml"
-```
-
-For details see [concerts.yaml](./src/api/concerts.yaml) and [template.yml](./src/template.yml).
-
-
-### Request handler: The API-handler Lambda function
-
-To build a single API handler Lambda function, with shared components like models or repositories, [Powertools Event Handler for REST API](https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/api_gateway/) provides a router, called resolver.
-
-Using this router as an entry point for the Lambda function, a MVC like, well structured Lambda function can be implemented, containing the following components:
-
-* **Request router** (Powertools APIGatewayHttpResolver): [index.py](./src/lambda/concerts_api_handler/index.py) - Is responsible to route the requests to the corresponding controller action, based on the path information from API Gateway, which it get's embedded in the event.
-* **Controller**: [controller/concerts_controller.py](./src/lambda/concerts_api_handler/src/controller/concerts_controller.py) - Is responsible to process the request parameters, validate them and invoke the repository, to get or create Concerts.
-* **Model**: [model/concert.py](./src/lambda/concerts_api_handler/src/model/concert.py) - Represents a Concert object.
-* **Repository**: [repository/concerts_repository.py](./src/lambda/concerts_api_handler/src/repository/concerts_repository.py) - Is responsible to persist and retrieve concert records to and from the DynamoDB database.
-
-Furthermore Powertools offers nice utilities for:
-
-* **Logging** - [Powertools logger](https://docs.powertools.aws.dev/lambda/python/latest/core/logger/)
-* **Tracing** - [Powertools tracer](https://docs.powertools.aws.dev/lambda/python/latest/core/tracer/)
-
-<!-- Edit: https://mermaid.live/ -->
 ```mermaid
 classDiagram
 
@@ -139,6 +103,8 @@ router: put_concert()
 router --> ConcertController: resolve route
 
 class ConcertController {
+   repository
+
    get_concerts_action()
    put_concert_action()
 }
@@ -152,85 +118,39 @@ class Concert {
    string artist
    string concert
    int ticket_sales
-   string created_date
+   datetime create_date
+
+   validate()
+   from_dto()
+   dto()
 }
 
 class ConcertRepository {
+   table_name
+   table
+
    find_concert_by_artist()
    create_concert()
+   concert_to_record()
+   record_to_concert()
 }
 ```
 
-SAM's "Serverless::Function" resource simplifies the deployment of such a Lambda function:
+### Database
 
-```yml
-# src/template.yml
+```mermaid
+erDiagram
 
-  ApiHandlerFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: index.lambda_handler
-      Runtime: python3.9
-      CodeUri: "./lambda/concerts_api_handler/src"
-      Layers:
-        - !Sub "arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:43"
-      Tracing: Active
-      Timeout: 10
-      Architectures:
-        - arm64
-      Environment:
-        Variables:
-          TABLE_NAME: !Ref ConcertsTable
-          LOG_LEVEL: !If [IsEnvProd, "WARNING", "INFO"]
-          POWERTOOLS_LOGGER_LOG_EVENT: !If [IsEnvProd, false, true]
-          POWERTOOLS_SERVICE_NAME: concerts_api_handler
-      Policies:
-        - AWSLambdaExecute
-        - Version: "2012-10-17"
-          Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:Query
-                - dynamodb:PutItem
-              Resource: !GetAtt ConcertsTable.Arn
-```
-
-### Persistence: The DynamoDB table
-
-To store concerts, a simple DynamoDB table is used:
-
-```yaml
-# src/template.yml
-
-  ConcertsTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      BillingMode: PAY_PER_REQUEST
-      TableName: !Sub "concerts-${env}"
-      AttributeDefinitions:
-        - AttributeName: artist
-          AttributeType: S
-        - AttributeName: concert
-          AttributeType: S
-      KeySchema:
-        - AttributeName: artist
-          KeyType: HASH
-        - AttributeName: concert
-          KeyType: RANGE
-```
-
-Concerts are stored as simple records like:
-
-```json
-{
-    "artist": "Madonna",
-    "concert": "This is Madonna 2023",
-    "ticket_sales": 5000000,
-    "created_date": "2023-09-08T14:47:29.915661"
+concerts-table {}
+concerts-table ||--|{ concert-record : contains
+concert-record {
+    string artist
+    string concert
+    decimal ticket_sales
+    decimal create_date
 }
 ```
 
----
 
 ## Development
 
@@ -252,6 +172,8 @@ Concerts are stored as simple records like:
 
 For instructions regarding SAM, see https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/using-sam-cli.html.
 
+### SAM deployment
+
 ```sh
 cd src
 ```
@@ -271,6 +193,8 @@ sam sync --stack-name concerts-api-dev --watch
 # Stack outputs
 sam list stack-outputs --stack-name concerts-api-dev
 ```
+
+### Cleanup
 
 ```sh
 # Delete stack
